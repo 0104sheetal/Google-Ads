@@ -1,4 +1,5 @@
 function main() {
+  Logger.log("Script started executing");
   var currentDate = new Date();
   var pastDate = new Date();
   pastDate.setDate(currentDate.getDate() - 365);
@@ -8,12 +9,14 @@ function main() {
 
   try {
     var regularCampaigns = AdsApp.campaigns().withCondition("Status = ENABLED").get();
+    Logger.log("Processing regular campaigns");
     while (regularCampaigns.hasNext()) {
       var campaign = regularCampaigns.next();
       processAdGroups(campaign.adGroups(), "Regular", campaign.getName(), fromDate, toDate);
     }
 
     var shoppingCampaigns = AdsApp.shoppingCampaigns().withCondition("Status = ENABLED").get();
+    Logger.log("Processing shopping campaigns");
     while (shoppingCampaigns.hasNext()) {
       var campaign = shoppingCampaigns.next();
       processAdGroups(campaign.adGroups(), "Shopping", campaign.getName(), fromDate, toDate);
@@ -24,11 +27,12 @@ function main() {
 }
 
 function processAdGroups(adGroupIterator, campaignTypeName, campaignName, fromDate, toDate) {
-  Logger.log("Processing Ad Groups for Campaign: " + campaignName); // Additional log to confirm function execution
+  Logger.log("Started processing Ad Groups for Campaign: " + campaignName);
   adGroupIterator = adGroupIterator.withCondition("Status = ENABLED").get();
 
   while (adGroupIterator.hasNext()) {
     var adGroup = adGroupIterator.next();
+    Logger.log("Processing Ad Group: " + adGroup.getName());
 
     var totalConversionsReport = AdsApp.report(
       "SELECT Conversions " +
@@ -51,7 +55,7 @@ function processAdGroups(adGroupIterator, campaignTypeName, campaignName, fromDa
         "WHERE AdGroupId = " + adGroup.getId() + " " +
         "DURING " + fromDate + "," + toDate
       );
-      var rows = report.rows();
+      rows = report.rows();
       var totalSpendForConvertingSearchTerms = 0;
       var totalConversions = 0;
       var totalClicksForConvertingSearchTerms = 0;
@@ -71,6 +75,9 @@ function processAdGroups(adGroupIterator, campaignTypeName, campaignName, fromDa
       if (totalConversions > 0) {
         var averageCostPerConversion = totalSpendForConvertingSearchTerms / totalConversions;
         var averageClicksPerConversion = totalClicksForConvertingSearchTerms / totalConversions;
+        Logger.log("Average Cost per Conversion: " + averageCostPerConversion);
+        Logger.log("Average Clicks per Conversion: " + averageClicksPerConversion);
+
         var roas = totalConversionValue / totalSpendForConvertingSearchTerms;
 
         if (roas < 1.5) {
@@ -93,10 +100,13 @@ function processAdGroups(adGroupIterator, campaignTypeName, campaignName, fromDa
         var keywordsString = searchTermsToNegate.map(function(keyword) {
           return "[" + keyword + "]";
         }).join("\n");
-        Logger.log(new Date().toLocaleString() + "\tCampaign: " + campaignName + "\nAd Group: " + adGroup.getName() + "\n" + keywordsString);
+        Logger.log("Keywords to be negated: \n" + keywordsString);
       }
+    } else {
+      Logger.log("Ad Group: " + adGroup.getName() + " has less than 20 conversions.");
     }
   }
+  Logger.log("Completed processing for Campaign: " + campaignName);
 }
 
 function isNegativeKeyword(adGroup, term) {
