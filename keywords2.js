@@ -24,6 +24,7 @@ function main() {
 }
 
 function processAdGroups(adGroupIterator, campaignTypeName, campaignName, fromDate, toDate) {
+  Logger.log("Processing Ad Groups for Campaign: " + campaignName); // Additional log to confirm function execution
   adGroupIterator = adGroupIterator.withCondition("Status = ENABLED").get();
 
   while (adGroupIterator.hasNext()) {
