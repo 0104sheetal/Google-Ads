@@ -57,6 +57,10 @@ function processAdGroups(adGroupIterator, campaignTypeName, campaignName, fromDa
             var searchTermsToNegate = [];
             var averageCostPerConversion = totalSpendForConvertingSearchTerms / totalConversions;
             var averageClicksPerConversion = totalClicksForConvertingSearchTerms / totalConversions;
+
+            Logger.log("Average Cost Per Conversion: " + averageCostPerConversion);
+            Logger.log("Average Clicks Per Conversion: " + averageClicksPerConversion);
+
             report = AdsApp.report("SELECT Query, Cost, Conversions, ConversionValue, Clicks " + "FROM SEARCH_QUERY_PERFORMANCE_REPORT " + "WHERE AdGroupId = " + adGroup.getId() + " " + "DURING " + fromDate + "," + toDate);
             rows = report.rows();
             while (rows.hasNext())
